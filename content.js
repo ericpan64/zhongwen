@@ -1463,6 +1463,7 @@ let miniHelp = `
     <tr><td><b>t&nbsp;:</b></td><td>&nbsp;Tatoeba</td></tr>
     </table>`;
 
+// --> This part is functionally what runs in Chrome
 // event listener
 chrome.runtime.onMessage.addListener(
     function (request) {

@@ -15,12 +15,18 @@
     "default_icon": "images/zhongwen48.png",
     "default_title": "Zhongwen Chinese Popup Dictionary"
   },
+
+// Enabling Context Menu in background, and permissions section
   "background": {
     "scripts": [
       "dict.js",
-      "background.js"
+      "background.js",
+      "eventPage.js" // new event page for right-click
     ]
-  },
+    ,"persistent":false
+  }
+
+  ,
   "content_scripts": [
     {
       "matches": [
@@ -39,7 +45,7 @@
   },
   "permissions": [
     "http://*/*",
-    "contextMenus"
+    "contextMenus" // allows for context menu in Chrome extension
   ],
   "web_accessible_resources": [
     "css/*",
