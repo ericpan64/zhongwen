@@ -5,6 +5,7 @@ var contextMenuItem = {
 };
 chrome.contextMenus.create(contextMenuItem);
 
+
 function isChinese(value) {
     // Return True if is Chinese character, false otherwise
     // Chinese should be unicode, so can search that way
@@ -17,7 +18,7 @@ function isChinese(value) {
     return false;
 }
 
-chrome.contextMenus.onClicked.addListener(function(clickData)){
+chrome.contextMenus.onClicked.addListener(function(clickData){
     if (clickData.menuItemId == "exportToCRM" && clickData.selectionText){
         if (isChinese(clickData.selectionText)){
             var user = 'User1'; // Need to change this later (Google Account)
@@ -28,10 +29,10 @@ chrome.contextMenus.onClicked.addListener(function(clickData)){
                 "body": text,
                 "context": URL
             };
-            
+
             // Open Local Host url with clickData.selectionText passed somehow
             // Looks like an HTTP request, follow tutorial:
-            // HTTP POST method, have 
+            // HTTP POST method, have
             const xhttp = new XMLHttpRequest();
             const destURL = 'localhost:5000/list/upload'; // local server URL
             xhttp.onreadystatechange = function() {
@@ -41,6 +42,7 @@ chrome.contextMenus.onClicked.addListener(function(clickData)){
             }
             xhttp.open("POST",text_json,true)
             xhttp.send();
+            //chrome.storage.sync.set({json here})
         }
     }
-}
+})
