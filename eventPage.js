@@ -1,11 +1,3 @@
-var contextMenuItem = {
-    "id": "exportToCRM",
-    "title": "Export text to 中文读几",
-    "contexts": ["selection"] // more contexts available on Chrome developer webpage
-};
-chrome.contextMenus.create(contextMenuItem);
-
-
 function isChinese(value) {
     // Return True if is Chinese character, false otherwise
     // Chinese should be unicode, so can search that way
@@ -18,31 +10,50 @@ function isChinese(value) {
     return false;
 }
 
-chrome.contextMenus.onClicked.addListener(function(clickData){
+// To-Do: need to fix this
+function httpPostAsync(theUrl, callback)
+{
+    // example from GET request: https://stackoverflow.com/questions/247483/http-get-request-in-javascript
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("POST", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+
+// Posts to CRM website
+function postToCRM(clickData){
+    console.log(clickData.selectionText); // print selectionText
     if (clickData.menuItemId == "exportToCRM" && clickData.selectionText){
         if (isChinese(clickData.selectionText)){
             var user = 'User1'; // Need to change this later (Google Account)
-            var text = clickData.selectionText;
-            var URL = window.location.href; // Check if this works
-            var text_json = {
+            //Get URL from current tab
+            chrome.tabs.query({'active':true, 'lastFocusedWindow':true}, function(tabs){
+                var text_json = {
                 "user": user,
-                "body": text,
-                "context": URL
-            };
-
-            // Open Local Host url with clickData.selectionText passed somehow
-            // Looks like an HTTP request, follow tutorial:
-            // HTTP POST method, have
-            const xhttp = new XMLHttpRequest();
-            const destURL = 'localhost:5000/list/upload'; // local server URL
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    console.log(xhttp.text);
-                }
-            }
-            xhttp.open("POST",text_json,true)
-            xhttp.send();
-            //chrome.storage.sync.set({json here})
+                "body": clickData.selectionText,
+                "title": tabs[0].title,
+                "URL": tabs[0].url
+                };
+                console.log(text_json); // print current tab
+            });
+            
+            /*
+            // Open New Tab
+            var newURL = "localhost:5000";
+            chrome.tabs.create({url: newURL});
+            */
         }
     }
-})
+}
+
+// Create Context Menu item
+chrome.contextMenus.create({
+    "id": "exportToCRM",
+    "title": "Export text to 中文读几",
+    "contexts": ["selection"] // more contexts available on Chrome developer webpage
+}); 
+
+chrome.contextMenus.onClicked.addListener(postToCRM);
