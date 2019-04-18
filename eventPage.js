@@ -1,5 +1,5 @@
-function isChinese(value) {
-    // Return True if is Chinese character, false otherwise
+function hasChinese(value) {
+    // Return True if string has Chinese character, false otherwise
     // Chinese should be unicode, so can search that way
     // https://stackoverflow.com/questions/11206443/how-can-i-check-if-variable-contains-chinese-japanese-characters
     "use strict";
@@ -10,24 +10,25 @@ function isChinese(value) {
     return false;
 }
 
-// To-Do: need to fix this
-function httpPostAsync(theUrl, callback)
-{
-    // example from GET request: https://stackoverflow.com/questions/247483/http-get-request-in-javascript
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText);
-    }
-    xmlHttp.open("POST", theUrl, true); // true for asynchronous 
-    xmlHttp.send(null);
+function postAjax(url, data) { // https://plainjs.com/javascript/ajax/send-ajax-get-and-post-requests-47/
+    /* Posts json data to URL, logs in console if successful */
+    var params = data;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.onload = function(){
+        console.log(this.responseText);
+      };
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send(params);
+    return xhr;
 }
 
 // Posts to CRM website
 function postToCRM(clickData){
     console.log(clickData.selectionText); // print selectionText
     if (clickData.menuItemId == "exportToCRM" && clickData.selectionText){
-        if (isChinese(clickData.selectionText)){
+        if (hasChinese(clickData.selectionText)){
             var user = 'User1'; // Need to change this later (Google Account)
             //Get URL from current tab
             chrome.tabs.query({'active':true, 'lastFocusedWindow':true}, function(tabs){
@@ -38,13 +39,14 @@ function postToCRM(clickData){
                 "URL": tabs[0].url
                 };
                 console.log(text_json); // print current tab
+
+                // Uploads text (POST request)
+                postAjax("http:localhost:5000/uploadText",text_json)
+
+                // Open New Tab to document
+                var newURL = "localhost:5000"; // Change this to landing page
+                chrome.tabs.create({url: newURL});
             });
-            
-            /*
-            // Open New Tab
-            var newURL = "localhost:5000";
-            chrome.tabs.create({url: newURL});
-            */
         }
     }
 }
