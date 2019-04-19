@@ -14,12 +14,12 @@ function postAjax(url, data) { // https://plainjs.com/javascript/ajax/send-ajax-
     /* Posts json data to URL, logs in console if successful */
     var params = data;
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', url);
+    xhr.open('POST', url, true);
     xhr.onload = function(){
-        console.log(this.responseText);
+        console.log(params); // logs data being sent
+        console.log(this.responseText); // logs response text from XMLHttpRequest (which hasn't done anything yet)
       };
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('Content-type', 'application/json');
     xhr.send(params);
     return xhr;
 }
@@ -32,19 +32,19 @@ function postToCRM(clickData){
             var user = 'User1'; // Need to change this later (Google Account)
             //Get URL from current tab
             chrome.tabs.query({'active':true, 'lastFocusedWindow':true}, function(tabs){
-                var text_json = {
+                var text_json = JSON.stringify({
                 "user": user,
                 "body": clickData.selectionText,
                 "title": tabs[0].title,
                 "URL": tabs[0].url
-                };
+                }); // converts to JSON string, see https://stackoverflow.com/questions/8294088/javascript-object-vs-json
                 console.log(text_json); // print current tab
 
                 // Uploads text (POST request)
                 postAjax("http:localhost:5000/uploadText",text_json)
 
                 // Open New Tab to document
-                var newURL = "localhost:5000"; // Change this to landing page
+                var newURL = "http:localhost:5000/print"; // Change this to landing page
                 chrome.tabs.create({url: newURL});
             });
         }
