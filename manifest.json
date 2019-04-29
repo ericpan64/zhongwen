@@ -45,7 +45,9 @@
   "permissions": [
     "http://*/*",
     "contextMenus",
-    "tabs"
+    "tabs",
+    "identity",
+    "identity.email"
   ],
   "web_accessible_resources": [
     "css/*",

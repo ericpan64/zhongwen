@@ -29,23 +29,25 @@ function postToCRM(clickData){
     console.log(clickData.selectionText); // print selectionText
     if (clickData.menuItemId == "exportToCRM" && clickData.selectionText){
         if (hasChinese(clickData.selectionText)){
-            var user = 'User1'; // Need to change this later (Google Account)
-            //Get URL from current tab
-            chrome.tabs.query({'active':true, 'lastFocusedWindow':true}, function(tabs){
-                var text_json = JSON.stringify({
-                "user": user,
-                "body": clickData.selectionText,
-                "title": tabs[0].title,
-                "URL": tabs[0].url
-                }); // converts to JSON string, see https://stackoverflow.com/questions/8294088/javascript-object-vs-json
-                console.log(text_json); // print current tab
+            chrome.identity.getProfileUserInfo(function(userInfo){
+                var user = userInfo.id; // Unique user ID if user is logged-in -- otherwise none
+                //Get URL from current tab
+                chrome.tabs.query({'active':true, 'lastFocusedWindow':true}, function(tabs){
+                    var text_json = JSON.stringify({
+                    "user": user,
+                    "body": clickData.selectionText,
+                    "title": tabs[0].title,
+                    "URL": tabs[0].url
+                    }); // converts to JSON string, see https://stackoverflow.com/questions/8294088/javascript-object-vs-json
+                    console.log(text_json); // print current tab
 
-                // Uploads text (POST request)
-                postAjax("http:localhost:5000/uploadText",text_json)
+                    // Uploads text (POST request)
+                    postAjax("http:localhost:5000/uploadText",text_json)
 
-                // Open New Tab to document
-                var newURL = "http:localhost:5000/print"; // Change this to landing page
-                chrome.tabs.create({url: newURL});
+                    // Open New Tab to document
+                    var newURL = "http:localhost:5000/"; // Change this to landing page
+                    chrome.tabs.create({url: newURL});
+                });
             });
         }
     }
@@ -53,9 +55,9 @@ function postToCRM(clickData){
 
 // Create Context Menu item
 chrome.contextMenus.create({
-    "id": "exportToCRM",
-    "title": "Export text to 中文读几",
-    "contexts": ["selection"] // more contexts available on Chrome developer webpage
+    id: "exportToCRM",
+    title: "Export text to 中文读几",
+    contexts: ["selection"] // more contexts available on Chrome developer webpage
 }); 
 
 chrome.contextMenus.onClicked.addListener(postToCRM);
